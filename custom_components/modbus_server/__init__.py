@@ -67,7 +67,7 @@ class ModbusServerManager:
         self._modbus_server = ModbusServer(ip_address, port, no_block=True)
         self._modbus_updated = ModbusUpdater(self._modbus_server)
 
-    async def start(self):
+    async def start(self, event=None):
         """Start the Kafka manager."""
         _LOGGER.error(f"{DOMAIN} Start ")
 
@@ -75,13 +75,12 @@ class ModbusServerManager:
         self.__running = True
         self.__polling_task = asyncio.create_task(
             self._network_loop_retry(
-          
                 interval=0.1,
             ),
             name="Updater:start_polling:polling_task",
         )
 
-    async def shutdown(self, _):
+    async def shutdown(self, event=None):
         """Shut the manager down."""
         _LOGGER.error(f"{DOMAIN} Stop ")
         await self._producer.stop()
