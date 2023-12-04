@@ -65,7 +65,6 @@ class ModbusServerManager:
         """Initialize."""
         self._hass = hass
         self._modbus_server = ModbusServer(ip_address, port, no_block=True)
-        self._modbus_updated = ModbusUpdater(self._modbus_server)
         self.__running = False
 
     async def start(self, event=None):
@@ -73,6 +72,7 @@ class ModbusServerManager:
         _LOGGER.error(f"{DOMAIN} Start ")
 
         self.__running = True
+        self._modbus_server.start()
         self.__polling_task = asyncio.create_task(
             self._network_loop_retry(
                 interval=0.1,
@@ -86,6 +86,7 @@ class ModbusServerManager:
 
         self.__running = False
         self.__polling_task.cancel()
+        self._modbus_server.stop()
 
     async def _network_loop_retry(self,  interval: float) -> None:
         state = [0]
@@ -98,12 +99,6 @@ class ModbusServerManager:
                 _LOGGER.error(f"{DOMAIN} fire event {newState[0]}")
                 self._hass.bus.fire("modbus_server_event", {'q1':newState[0]})
             await asyncio.sleep(interval)
-
-
-class ModbusUpdater: 
-    def __init__(self, modbus_server):
-         self._modbus_server = modbus_server
-         self._running = False;
 
 
 
