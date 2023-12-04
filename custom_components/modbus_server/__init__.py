@@ -71,7 +71,6 @@ class ModbusServerManager:
         """Start the Kafka manager."""
         _LOGGER.error(f"{DOMAIN} Start ")
 
-        await self._producer.start()
         self.__running = True
         self.__polling_task = asyncio.create_task(
             self._network_loop_retry(
@@ -83,7 +82,7 @@ class ModbusServerManager:
     async def shutdown(self, event=None):
         """Shut the manager down."""
         _LOGGER.error(f"{DOMAIN} Stop ")
-        await self._producer.stop()
+
         self.__running = False
         self.__polling_task.cancel()
 
