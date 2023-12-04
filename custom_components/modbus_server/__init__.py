@@ -66,6 +66,7 @@ class ModbusServerManager:
         self._hass = hass
         self._modbus_server = ModbusServer(ip_address, port, no_block=True)
         self._modbus_updated = ModbusUpdater(self._modbus_server)
+        self.__running = False
 
     async def start(self, event=None):
         """Start the Kafka manager."""
@@ -88,7 +89,7 @@ class ModbusServerManager:
 
     async def _network_loop_retry(self,  interval: float) -> None:
         state = [0]
-        _LOGGER.error(f"{DOMAIN} start _network_loop_retry ")
+        _LOGGER.error(f"{DOMAIN} start _network_loop_retry {self.__running}")
 
         while self.__running:
             newState = self._modbus_server.data_bank.get_coils(0)
