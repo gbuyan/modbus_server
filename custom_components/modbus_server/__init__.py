@@ -94,6 +94,7 @@ class ModbusServerManager:
             newState = self._modbus_server.data_bank.get_coils(0)
             if state != newState:
                 state = newState
+                _LOGGER.error(f"{DOMAIN} fire event {newState[0]}")
                 self._hass.bus.fire("modbus_server_event", {'q1':newState[0]})
             await asyncio.sleep(interval)
 
