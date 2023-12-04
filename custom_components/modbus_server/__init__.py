@@ -53,20 +53,6 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
 
     return True
 
-
-class DateTimeJSONEncoder(json.JSONEncoder):
-    """Encode python objects.
-
-    Additionally add encoding for datetime objects as isoformat.
-    """
-
-    def default(self, o):
-        """Implement encoding logic."""
-        if isinstance(o, datetime):
-            return o.isoformat()
-        return super().default(o)
-
-
 class ModbusServerManager:
     """Define a manager to buffer events from modbus."""
 
@@ -77,7 +63,6 @@ class ModbusServerManager:
         port,
     ):
         """Initialize."""
-        self._encoder = DateTimeJSONEncoder()
         self._hass = hass
         self._modbus_server = ModbusServer(ip_address, port, no_block=True)
         self._modbus_updated = ModbusUpdater(self._modbus_server)
