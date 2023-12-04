@@ -1,6 +1,4 @@
 """Support for Apache Kafka."""
-from datetime import datetime
-import json
 import asyncio
 
 from pyModbusTCP.server import ModbusServer
@@ -11,12 +9,15 @@ from homeassistant.const import (
     CONF_IP_ADDRESS,
     CONF_PORT,
     EVENT_HOMEASSISTANT_STOP,
+    EVENT_HOMEASSISTANT_START
 )
 from homeassistant.core import HomeAssistant
 import homeassistant.helpers.config_validation as cv
-from homeassistant.helpers.entityfilter import FILTER_SCHEMA
 from homeassistant.helpers.typing import ConfigType
-from homeassistant.util import ssl as ssl_util
+
+import logging
+
+_LOGGER: logging.Logger = logging.getLogger(__package__)
 
 
 DOMAIN = "modbus_server"
@@ -39,6 +40,8 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
 
     conf = config[DOMAIN]
 
+    _LOGGER.error(f"{DOMAIN} async_setup {conf[CONF_IP_ADDRESS]}:{conf[CONF_PORT]}")
+
     modbus_server = hass.data[DOMAIN] = ModbusServerManager(
         hass,
         conf[CONF_IP_ADDRESS],
@@ -46,8 +49,7 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     )
 
     hass.bus.async_listen_once(EVENT_HOMEASSISTANT_STOP, modbus_server.shutdown)
-
-    await modbus_server.start()
+    hass.bus.async_listen_once(EVENT_HOMEASSISTANT_START, modbus_server.start)
 
     return True
 
@@ -82,6 +84,8 @@ class ModbusServerManager:
 
     async def start(self):
         """Start the Kafka manager."""
+        _LOGGER.error(f"{DOMAIN} Start ")
+
         await self._producer.start()
         self.__running = True
         self.__polling_task = asyncio.create_task(
@@ -94,12 +98,15 @@ class ModbusServerManager:
 
     async def shutdown(self, _):
         """Shut the manager down."""
+        _LOGGER.error(f"{DOMAIN} Stop ")
         await self._producer.stop()
         self.__running = False
         self.__polling_task.cancel()
 
     async def _network_loop_retry(self,  interval: float) -> None:
         state = [0]
+        _LOGGER.error(f"{DOMAIN} start _network_loop_retry ")
+
         while self.__running:
             newState = self._modbus_server.data_bank.get_coils(0)
             if state != newState:
