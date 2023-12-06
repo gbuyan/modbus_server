@@ -63,7 +63,7 @@ class ModbusServerManager:
 
     def __init__(
         self,
-        hass,
+        hass: HomeAssistant,
         host,
         port,
         msg_wait
@@ -105,9 +105,7 @@ class ModbusServerManager:
             for index, item in enumerate(newState):
                 if state[index] != item:
                     _LOGGER.error(f"{DOMAIN} fire event {index}:{item}")
-                    event={}
-                    event["q" + index] = item
-                    self._hass.bus.fire("modbus_server_event", event)
+                    self._hass.bus.fire("modbus_server_event", {"q": index, "state": item})
             state = newState.copy()
             await asyncio.sleep(interval)
 
