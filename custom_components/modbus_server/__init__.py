@@ -30,7 +30,7 @@ CONFIG_SCHEMA = vol.Schema(
             {
                 vol.Required(CONF_HOST): cv.string,
                 vol.Required(CONF_PORT): cv.port,
-                vol.Required(CONF_MSG_WAIT): cv.positive_float,
+                vol.Optional(CONF_MSG_WAIT): cv.positive_float,
 
             }
         )
@@ -105,7 +105,7 @@ class ModbusServerManager:
             for index, item in enumerate(newState):
                 if state[index] != item:
                     _LOGGER.error(f"{DOMAIN} fire event {index}:{item}")
-                    self._hass.bus.fire("modbus_server_event", {('q'+index): item})
+                    #self._hass.bus.fire("modbus_server_event", {('q'+index): item})
             state = newState.copy()
             await asyncio.sleep(interval)
 
