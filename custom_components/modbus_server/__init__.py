@@ -106,7 +106,7 @@ class ModbusServerManager:
                 if state[index] != item:
                     _LOGGER.error(f"{DOMAIN} fire event {index}:{item}")
                     self._hass.bus.fire("modbus_server_event", {('q'+index): item})
-            state = newState
+            state = newState.copy()
             await asyncio.sleep(interval)
 
 
